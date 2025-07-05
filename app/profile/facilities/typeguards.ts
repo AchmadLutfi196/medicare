@@ -32,18 +32,25 @@ export type Facility = MedicalFacility | SupportFacility | GeneralFacility | Tec
 
 // Type guards for facility objects
 
+// More specific type guards that check multiple properties to ensure correct identification
 export function isMedicalFacility(facility: Facility): facility is MedicalFacility {
-  return 'certification' in facility && 'staff' in facility;
+  return 'capacity' in facility && 'staff' in facility && 'certification' in facility 
+    && !('types' in facility) && !('coverage' in facility) && !('benefits' in facility);
 }
 
 export function isSupportFacility(facility: Facility): facility is SupportFacility {
-  return 'certification' in facility && 'staff' in facility;
+  return 'capacity' in facility && 'staff' in facility && 'certification' in facility
+    && !('types' in facility) && !('coverage' in facility) && !('benefits' in facility);
 }
 
 export function isGeneralFacility(facility: Facility): facility is GeneralFacility {
-  return 'types' in facility;
+  return 'capacity' in facility && 'types' in facility 
+    && !('staff' in facility) && !('certification' in facility)
+    && !('coverage' in facility) && !('benefits' in facility);
 }
 
 export function isTechnologyFacility(facility: Facility): facility is TechnologyFacility {
-  return 'coverage' in facility && 'benefits' in facility;
+  return 'coverage' in facility && 'benefits' in facility
+    && !('capacity' in facility) && !('staff' in facility) 
+    && !('certification' in facility) && !('types' in facility);
 }

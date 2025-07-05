@@ -340,8 +340,9 @@ export default function FacilitiesPage() {
 
                     {/* Additional Info */}
                     <div className="grid grid-cols-1 gap-4">
-                      {/* Capacity property (not available on TechnologyFacility) */}
-                      {!isTechnologyFacility(facility) && facility.capacity && (
+                      {/* Capacity property - explicitly check facility types that have capacity property */}
+                      {/* TypeScript needs explicit type narrowing with type guards to properly type-check this */}
+                      {(isGeneralFacility(facility) || isMedicalFacility(facility) || isSupportFacility(facility)) && facility.capacity && (
                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600">Kapasitas</span>
                           <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
