@@ -22,6 +22,17 @@ import {
   Microscope,
   Pill
 } from 'lucide-react';
+import { 
+  Facility,
+  MedicalFacility,
+  SupportFacility,
+  GeneralFacility,
+  TechnologyFacility,
+  isMedicalFacility,
+  isSupportFacility,
+  isGeneralFacility,
+  isTechnologyFacility
+} from './typeguards';
 
 export default function FacilitiesPage() {
   const [activeCategory, setActiveCategory] = useState('medical');
@@ -225,13 +236,13 @@ export default function FacilitiesPage() {
     }
   ];
 
-  const getCurrentFacilities = () => {
+  const getCurrentFacilities = (): Facility[] => {
     switch (activeCategory) {
-      case 'medical': return medicalFacilities;
-      case 'support': return supportFacilities;
-      case 'general': return generalFacilities;
-      case 'technology': return technologyFacilities;
-      default: return medicalFacilities;
+      case 'medical': return medicalFacilities as MedicalFacility[];
+      case 'support': return supportFacilities as SupportFacility[];
+      case 'general': return generalFacilities as GeneralFacility[];
+      case 'technology': return technologyFacilities as TechnologyFacility[];
+      default: return medicalFacilities as MedicalFacility[];
     }
   };
 
@@ -329,35 +340,39 @@ export default function FacilitiesPage() {
 
                     {/* Additional Info */}
                     <div className="grid grid-cols-1 gap-4">
-                      {facility.capacity && (
+                      {/* Capacity property (not available on TechnologyFacility) */}
+                      {!isTechnologyFacility(facility) && facility.capacity && (
                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600">Kapasitas</span>
                           <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
                         </div>
                       )}
                       
-                      {facility.staff && (
+                      {/* Properties for Medical and Support facilities */}
+                      {(isMedicalFacility(facility) || isSupportFacility(facility)) && facility.staff && (
                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600">Tenaga Ahli</span>
                           <span className="text-sm font-bold text-gray-900">{facility.staff}</span>
                         </div>
                       )}
 
-                      {facility.certification && (
+                      {(isMedicalFacility(facility) || isSupportFacility(facility)) && facility.certification && (
                         <div className="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
                           <span className="text-sm font-medium text-teal-600">Sertifikasi</span>
                           <span className="text-sm font-bold text-teal-900">{facility.certification}</span>
                         </div>
                       )}
 
-                      {facility.coverage && (
+                      {/* Properties for Technology facilities */}
+                      {isTechnologyFacility(facility) && facility.coverage && (
                         <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                           <span className="text-sm font-medium text-blue-600">Cakupan</span>
                           <span className="text-sm font-bold text-blue-900">{facility.coverage}</span>
                         </div>
                       )}
 
-                      {facility.types && (
+                      {/* Properties for General facilities */}
+                      {isGeneralFacility(facility) && facility.types && (
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600 block mb-2">Jenis Layanan</span>
                           <div className="flex flex-wrap gap-2">
@@ -370,7 +385,8 @@ export default function FacilitiesPage() {
                         </div>
                       )}
 
-                      {facility.benefits && (
+                      {/* Properties for Technology facilities */}
+                      {isTechnologyFacility(facility) && facility.benefits && (
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600 block mb-2">Manfaat</span>
                           <div className="flex flex-wrap gap-2">

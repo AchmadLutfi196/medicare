@@ -20,9 +20,22 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
+// Define Doctor interface
+interface Doctor {
+  id: number;
+  name: string;
+  specialty: string;
+  rating: number;
+  experience: string;
+  price: string;
+  schedule: {
+    [key: string]: string[]; // Day of week as key (e.g., 'Monday') with array of times
+  };
+}
+
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [formData, setFormData] = useState({
@@ -33,7 +46,7 @@ export default function BookingPage() {
     insurance: ''
   });
 
-  const doctors = [
+  const doctors: Doctor[] = [
     {
       id: 1,
       name: 'Dr. Andi Wijaya, Sp.JP(K)',
@@ -90,7 +103,7 @@ export default function BookingPage() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -276,7 +289,7 @@ export default function BookingPage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Pilih Waktu</h3>
                   {selectedDate ? (
                     <div className="grid grid-cols-2 gap-3">
-                      {getAvailableTimes().map((time) => (
+                      {getAvailableTimes().map((time: string) => (
                         <button
                           key={time}
                           className={`p-3 rounded-lg font-semibold transition-colors ${

@@ -1,6 +1,17 @@
-// API route for user authentication and management
+// API route for user authentication and management - SIMPLIFIED VERSION
 import { NextRequest, NextResponse } from 'next/server';
-import { userService } from '../../../services/user.service';
+import { cookies } from 'next/headers';
+import { open } from 'sqlite';
+import sqlite3 from 'sqlite3';
+import { directLogin } from '../../../lib/auth-utils';
+
+// Helper function to get database connection
+async function getDb() {
+  return open({
+    filename: './prisma/dev.db',
+    driver: sqlite3.Database
+  });
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,65 +20,77 @@ export async function GET(request: NextRequest) {
     // Check if getting single user by ID
     const id = searchParams.get('id');
     if (id) {
-      const result = await userService.getUserById(id);
-      return NextResponse.json(result);
+      try {
+        const db = await getDb();
+        const user = await db.get('SELECT * FROM User WHERE id = ?', [id]);
+        
+        if (user) {
+          // Don't return sensitive information
+          delete user.password;
+          
+          return NextResponse.json({
+            success: true,
+            data: user
+          });
+        } else {
+          return NextResponse.json({
+            success: false,
+            error: 'User not found'
+          }, { status: 404 });
+        }
+      } catch (error) {
+        console.error('Database error:', error);
+        return NextResponse.json({
+          success: false,
+          error: 'Database error'
+        }, { status: 500 });
+      }
     }
 
     // Special endpoints
     const endpoint = searchParams.get('endpoint');
     
     if (endpoint === 'current') {
-      const currentUser = userService.getCurrentUser();
-      if (currentUser) {
-        return NextResponse.json({
-          success: true,
-          data: currentUser
-        });
-      } else {
-        return NextResponse.json({
-          success: false,
-          error: 'No user logged in'
-        }, { status: 401 });
+      // Get user ID from cookies
+      const cookieStore = cookies();
+      const userId = cookieStore.get('userId')?.value;
+      
+      if (userId) {
+        try {
+          const db = await getDb();
+          const user = await db.get('SELECT * FROM User WHERE id = ?', [userId]);
+          
+          if (user) {
+            // Don't return sensitive information
+            delete user.password;
+            
+            return NextResponse.json({
+              success: true,
+              data: user
+            });
+          }
+        } catch (error) {
+          console.error('Database error:', error);
+        }
       }
+      
+      return NextResponse.json({
+        success: false,
+        error: 'No user logged in'
+      }, { status: 401 });
     }
     
-    if (endpoint === 'stats') {
-      const result = await userService.getUserStats();
-      return NextResponse.json(result);
-    }
-
-    // Get users by role or all users
-    const role = searchParams.get('role');
-    const search = searchParams.get('search');
-    
-    if (search) {
-      const result = await userService.searchUsers(
-        search, 
-        role as any || undefined
-      );
-      return NextResponse.json(result);
-    }
-    
-    // Check if pagination is requested
-    const page = searchParams.get('page');
-    const limit = searchParams.get('limit');
-    
-    if (page && limit) {
-      const result = await userService.getUsersPaginated(
-        parseInt(page), 
-        parseInt(limit), 
-        role as any || undefined
-      );
-      return NextResponse.json(result);
-    } else {
-      const result = await userService.getAllUsers(role as any || undefined);
-      return NextResponse.json(result);
-    }
+    // Default response for unhandled GET endpoints
+    return NextResponse.json({
+      success: false,
+      error: 'Invalid endpoint'
+    }, { status: 400 });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error in GET handler:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Server error'
+    }, { status: 500 });
   }
 }
 
@@ -76,103 +99,57 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
     const body = await request.json();
-    
-    let result;
-    
-    if (action === 'register') {
-      const { email, password, firstName, lastName, phone, role, dateOfBirth, gender, address } = body;
-      result = await userService.register(email, password, firstName, lastName, phone, role, dateOfBirth, gender, address);
-    } else if (action === 'login') {
+
+    // Login action
+    if (action === 'login') {
       const { email, password } = body;
-      result = await userService.login(email, password);
-    } else if (action === 'logout') {
-      result = await userService.logout();
-    } else {
-      return NextResponse.json(
-        { success: false, error: 'Invalid action' },
-        { status: 400 }
-      );
+      const result = await directLogin(email, password);
+      
+      // If login successful, set cookies
+      if (result.success && result.data) {
+        const userId = result.data.id;
+        cookies().set('userId', userId, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60 * 24 * 7 // 1 week
+        });
+      }
+      
+      return NextResponse.json(result);
     }
     
-    if (result.success) {
-      return NextResponse.json(result, { 
-        status: action === 'register' ? 201 : 200 
+    // Logout action
+    if (action === 'logout') {
+      cookies().delete('userId');
+      return NextResponse.json({
+        success: true,
+        data: { message: 'Logged out successfully' }
       });
-    } else {
-      return NextResponse.json(result, { status: 400 });
     }
+
+    // Default response for unhandled POST actions
+    return NextResponse.json({
+      success: false,
+      error: 'Invalid action'
+    }, { status: 400 });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error in POST handler:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Server error'
+    }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const action = searchParams.get('action');
-    
-    if (!id && action !== 'profile') {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-    
-    const body = await request.json();
-    let result;
-    
-    if (action === 'profile') {
-      result = await userService.updateProfile(body);
-    } else if (action === 'activate') {
-      result = await userService.activateUser(id!);
-    } else if (action === 'deactivate') {
-      result = await userService.deactivateUser(id!);
-    } else if (action === 'profile-image') {
-      result = await userService.updateProfileImage(body.imageUrl);
-    } else {
-      result = await userService.updateUser(id!, body);
-    }
-    
-    if (result.success) {
-      return NextResponse.json(result);
-    } else {
-      return NextResponse.json(result, { status: 400 });
-    }
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+// Handle other HTTP methods (not implemented for simplicity)
+export async function PUT() {
+  return NextResponse.json({ success: false, error: 'Method not implemented' }, { status: 501 });
 }
 
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-    
-    const result = await userService.deleteUser(id);
-    
-    if (result.success) {
-      return NextResponse.json(result);
-    } else {
-      return NextResponse.json(result, { status: 400 });
-    }
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+export async function PATCH() {
+  return NextResponse.json({ success: false, error: 'Method not implemented' }, { status: 501 });
+}
+
+export async function DELETE() {
+  return NextResponse.json({ success: false, error: 'Method not implemented' }, { status: 501 });
 }

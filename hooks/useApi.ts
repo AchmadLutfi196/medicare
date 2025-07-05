@@ -153,7 +153,7 @@ export function usePagination<T>(
   }, [page, limit, baseUrl]);
 
   const nextPage = () => {
-    if (data && page < data.totalPages) {
+    if (data && data.meta && page < data.meta.totalPages) {
       setPage(page + 1);
     }
   };
@@ -165,7 +165,7 @@ export function usePagination<T>(
   };
 
   const goToPage = (newPage: number) => {
-    if (data && newPage >= 1 && newPage <= data.totalPages) {
+    if (data && data.meta && newPage >= 1 && newPage <= data.meta.totalPages) {
       setPage(newPage);
     }
   };
