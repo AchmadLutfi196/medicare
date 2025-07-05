@@ -3,24 +3,281 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --primary: #0ABAB5;
+  --primary-dark: #089891;
+  --primary-light: #e6f9f8;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Hero Section Animations */
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 20px rgba(10, 186, 181, 0.2); }
+  to { box-shadow: 0 0 40px rgba(10, 186, 181, 0.4); }
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, #0ABAB5, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth entrance animations */
+.entrance-slide-up {
+  animation: entranceSlideUp 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes entranceSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.entrance-scale {
+  animation: entranceScale 0.6s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+@keyframes entranceScale {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Parallax effect for background elements */
+.parallax-slow {
+  animation: parallaxSlow 20s linear infinite;
+}
+
+@keyframes parallaxSlow {
+  from { transform: translateX(-100px); }
+  to { transform: translateX(100px); }
+}
+
+.parallax-fast {
+  animation: parallaxFast 15s linear infinite reverse;
+}
+
+@keyframes parallaxFast {
+  from { transform: translateX(-50px); }
+  to { transform: translateX(50px); }
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading animation */
+.loading-dots {
+  animation: loadingDots 1.4s infinite ease-in-out;
+}
+
+@keyframes loadingDots {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* Gallery & Interactive Animations */
+.gallery-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.testimonial-card {
+  animation: testimonialFloat 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes testimonialFloat {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.doctor-card {
+  transition: all 0.3s ease;
+}
+
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-item {
+  animation: timelineSlide 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+@keyframes timelineSlide {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.certification-card {
+  transition: all 0.3s ease;
+}
+
+.certification-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.award-card {
+  transition: all 0.3s ease;
+}
+
+.award-card:hover {
+  transform: scale(1.05);
+}
+
+/* Button Hover Effects */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Tab Animation */
+.tab-content {
+  animation: tabFadeIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes tabFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Rating Stars Animation */
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.star-rating .star {
+  transition: all 0.2s ease;
+}
+
+.star-rating:hover .star {
+  transform: scale(1.1);
+}
+
+/* Virtual Tour Hover Effect */
+.virtual-tour-btn {
+  transition: all 0.3s ease;
+}
+
+.virtual-tour-btn:hover {
+  transform: scale(1.02);
+  background: linear-gradient(135deg, #0ABAB5, #06B6D4);
+}
+
+/* Smooth scrolling for tab navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .gallery-hover:hover {
+    transform: none;
+  }
+  
+  .doctor-card:hover {
+    transform: none;
+  }
+  
+  .timeline-item {
+    transform: translateX(0);
+  }
 }
