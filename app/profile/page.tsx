@@ -270,7 +270,7 @@ export default function HospitalProfile() {
   ];
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
+    <div className="pt-16 sm:pt-20 min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 text-white py-20">
         <div className="absolute inset-0 bg-black/10"></div>
@@ -345,7 +345,7 @@ export default function HospitalProfile() {
 
       {/* Tab Content */}
       <section className="py-16">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 tab-content">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="space-y-16">
@@ -891,7 +891,7 @@ export default function HospitalProfile() {
                 <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-teal-200"></div>
                 <div className="space-y-8">
                   {milestones.map((milestone, index) => (
-                    <div key={index} className="relative flex items-center">
+                    <div key={index} className="relative flex items-center timeline-item" style={{animationDelay: `${index * 0.1}s`}}>
                       <div className="absolute left-6 w-4 h-4 bg-teal-600 rounded-full border-4 border-white shadow-lg"></div>
                       <div className="ml-16 bg-white rounded-xl p-6 shadow-lg flex-1 hover:shadow-xl transition-shadow duration-300">
                         <div className="flex items-center justify-between">

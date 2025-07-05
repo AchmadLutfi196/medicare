@@ -9,8 +9,43 @@ import {
   Clock,
   Heart,
   Activity,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Info
 } from 'lucide-react';
+
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'confirmed':
+      return 'bg-green-100 text-green-800';
+    case 'waiting':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'in progress':
+      return 'bg-blue-100 text-blue-800';
+    case 'available':
+      return 'bg-green-100 text-green-800';
+    case 'busy':
+      return 'bg-red-100 text-red-800';
+    case 'break':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getAlertIcon = (type: string) => {
+  switch (type) {
+    case 'success':
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    case 'warning':
+      return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+    case 'error':
+      return <XCircle className="w-5 h-5 text-red-500" />;
+    default:
+      return <Info className="w-5 h-5 text-blue-500" />;
+  }
+};
 
 const AdminDashboard = () => {
   const stats = [
@@ -110,92 +145,97 @@ const AdminDashboard = () => {
       specialty: 'Penyakit Dalam',
       status: 'Break',
       nextPatient: '13:00',
-      totalToday: 9
+      totalToday: 10
     }
   ];
 
   const alerts = [
     {
       type: 'warning',
-      message: 'Stok obat Paracetamol hampir habis',
-      time: '10 menit yang lalu'
-    },
-    {
-      type: 'info',
-      message: 'Maintenance sistem dijadwalkan malam ini',
-      time: '1 jam yang lalu'
+      message: 'Server maintenance dijadwalkan pada 22:00 WIB malam ini',
+      time: '2 jam yang lalu'
     },
     {
       type: 'success',
       message: 'Backup data berhasil dilakukan',
-      time: '2 jam yang lalu'
+      time: '4 jam yang lalu'
+    },
+    {
+      type: 'info',
+      message: 'Update sistem keamanan telah diinstall',
+      time: '6 jam yang lalu'
+    },
+    {
+      type: 'error',
+      message: 'Koneksi printer ruang 3A terputus',
+      time: '8 jam yang lalu'
     }
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'Waiting':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'In Progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'Available':
-        return 'bg-green-100 text-green-800';
-      case 'Busy':
-        return 'bg-red-100 text-red-800';
-      case 'Break':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case 'warning':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-      case 'info':
-        return <AlertCircle className="w-5 h-5 text-blue-500" />;
-      case 'success':
-        return <AlertCircle className="w-5 h-5 text-green-500" />;
-      default:
-        return <AlertCircle className="w-5 h-5 text-gray-500" />;
-    }
-  };
-
   return (
-    <div className="p-6">
-      {/* Header */}
+    <div className="p-6 space-y-6">
+      {/* Header Dashboard */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Selamat datang di panel admin RS Medicare Prima</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard Admin</h1>
+            <p className="text-gray-600">Selamat datang di panel administrasi RS Medicare Prima</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200">
+              <Clock className="w-5 h-5" />
+            </button>
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-900">
+                {new Date().toLocaleDateString('id-ID', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+              <p className="text-sm text-gray-500">
+                {new Date().toLocaleTimeString('id-ID', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })} WIB
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((item) => {
-          const Icon = item.icon;
+        {stats.map((stat) => {
+          const Icon = stat.icon;
           return (
-            <div key={item.name} className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <div className={`${item.color} rounded-lg p-3`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{item.name}</p>
-                  <div className="flex items-baseline">
-                    <p className="text-2xl font-semibold text-gray-900">{item.value}</p>
-                    <p className={`ml-2 flex items-baseline text-sm font-semibold ${
-                      item.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <TrendingUp className="self-center flex-shrink-0 h-4 w-4 text-green-500" />
-                      <span className="sr-only">
-                        {item.changeType === 'increase' ? 'Increased' : 'Decreased'} by
-                      </span>
-                      {item.change}
-                    </p>
+            <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
                   </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        {stat.name}
+                      </dt>
+                      <dd>
+                        <div className="text-lg font-medium text-gray-900">{stat.value}</div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-5 py-3">
+                <div className="text-sm">
+                  <span className={`font-medium ${stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change}
+                  </span>
+                  <span className="text-gray-500"> dari bulan lalu</span>
                 </div>
               </div>
             </div>
@@ -318,19 +358,19 @@ const AdminDashboard = () => {
           </div>
           <div className="p-6">
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700">
+              <button className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 transition-colors">
                 <Users className="w-4 h-4 mr-2" />
                 Tambah Dokter
               </button>
-              <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                 <Calendar className="w-4 h-4 mr-2" />
                 Kelola Jadwal
               </button>
-              <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                 <FileText className="w-4 h-4 mr-2" />
                 Tulis Artikel
               </button>
-              <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                 <Activity className="w-4 h-4 mr-2" />
                 Lihat Laporan
               </button>

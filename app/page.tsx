@@ -92,7 +92,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 sm:pt-20">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-100 min-h-screen flex items-center">
         {/* Animated Background Elements */}
