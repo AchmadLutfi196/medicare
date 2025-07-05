@@ -18,6 +18,7 @@ import {
   AlertCircle,
   UserPlus
 } from 'lucide-react';
+import { usePrismaAuth } from '../../contexts/PrismaAuthContext';
 
 interface FormData {
   fullName: string;
@@ -52,6 +53,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
   const router = useRouter();
+  const { register } = usePrismaAuth();
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
@@ -115,14 +117,54 @@ export default function RegisterPage() {
     
     setIsLoading(true);
 
-    // Simulate registration process
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Split full name into first and last name
+      const nameParts = formData.fullName.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || firstName;
+
+      // Log the exact registration data - ensure email is normalized (trimmed and lowercase)
+      const registrationData = {
+        email: formData.email.trim().toLowerCase(), // Normalize email for consistent storage
+        password: formData.password,
+        firstName,
+        lastName,
+        phone: formData.phone,
+        dateOfBirth: formData.birthDate,
+        gender: formData.gender as 'MALE' | 'FEMALE' | 'OTHER', // Gender is already uppercase
+        address: formData.address,
+      };
       
-      // Success - redirect to login with success message
-      router.push('/login?registered=true');
+      console.log('Submitting registration data:', {
+        ...registrationData,
+        password: registrationData.password ? '********' : undefined // Don't log actual password
+      });
+      
+      console.log('Calling register function...');
+      const result = await register(registrationData);
+      console.log('Register function returned:', result);
+
+      if (result.success) {
+        console.log('Registration successful, redirecting to login');
+        // Success - redirect to login with success message
+        router.push('/login?registered=true');
+      } else {
+        console.error('Registration failed:', result.error);
+        let errorMessage = result.error || 'Registrasi gagal. Silakan coba lagi.';
+        
+        // Make database errors more user-friendly
+        if (errorMessage.includes('Database error') || errorMessage.includes('Unknown argument')) {
+          console.error('Database error details:', errorMessage);
+          errorMessage = 'Terjadi kesalahan pada sistem database. Tim kami sedang memperbaikinya.';
+        }
+        
+        setErrors({ 
+          submit: errorMessage
+        });
+      }
     } catch (error) {
-      setErrors({ submit: 'Terjadi kesalahan. Silakan coba lagi.' });
+      console.error('Registration error:', error);
+      setErrors({ submit: 'Terjadi kesalahan pada sistem. Silakan coba lagi.' });
     } finally {
       setIsLoading(false);
     }
@@ -284,17 +326,20 @@ export default function RegisterPage() {
                     Jenis Kelamin *
                   </label>
                   <div className="grid grid-cols-2 gap-4">
-                    {['Laki-laki', 'Perempuan'].map((gender) => (
-                      <label key={gender} className="flex items-center space-x-2 cursor-pointer">
+                    {[
+                      { label: 'Laki-laki', value: 'MALE' },
+                      { label: 'Perempuan', value: 'FEMALE' }
+                    ].map((genderOption) => (
+                      <label key={genderOption.value} className="flex items-center space-x-2 cursor-pointer">
                         <input
                           type="radio"
                           name="gender"
-                          value={gender}
-                          checked={formData.gender === gender}
+                          value={genderOption.value}
+                          checked={formData.gender === genderOption.value}
                           onChange={(e) => handleInputChange('gender', e.target.value)}
                           className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300"
                         />
-                        <span className="text-sm text-gray-700">{gender}</span>
+                        <span className="text-sm text-gray-700">{genderOption.label}</span>
                       </label>
                     ))}
                   </div>
@@ -431,9 +476,15 @@ export default function RegisterPage() {
             )}
 
             {errors.submit && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center flex items-center justify-center space-x-2">
-                <AlertCircle className="w-4 h-4" />
-                <span>{errors.submit}</span>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-start space-x-2">
+                <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Registrasi gagal</p>
+                  <p>{errors.submit}</p>
+                  {errors.submit.includes('database') && (
+                    <p className="mt-1 text-xs">Kode error: DB-AUTH-001</p>
+                  )}
+                </div>
               </div>
             )}
 

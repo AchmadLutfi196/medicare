@@ -18,10 +18,14 @@ import {
   Stethoscope,
   Plus
 } from 'lucide-react';
+import { useFeaturedTestimonials } from '../hooks/useTestimonials';
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Fetch featured testimonials from database
+  const { testimonials: featuredTestimonials, loading: testimonialsLoading } = useFeaturedTestimonials(3);
 
   useEffect(() => {
     setIsVisible(true);
@@ -68,27 +72,6 @@ export default function Home() {
     'Akreditasi KARS',
     'Asuransi kesehatan diterima',
     'Laboratorium lengkap'
-  ];
-
-  const testimonials = [
-    {
-      name: 'Budi Santoso',
-      role: 'Pasien',
-      content: 'Pelayanan yang sangat memuaskan. Dokter dan perawat sangat profesional dan ramah.',
-      rating: 5
-    },
-    {
-      name: 'Siti Aminah',
-      role: 'Keluarga Pasien',
-      content: 'Fasilitas rumah sakit sangat lengkap dan bersih. Proses administrasi juga mudah.',
-      rating: 5
-    },
-    {
-      name: 'Ahmad Rizki',
-      role: 'Pasien',
-      content: 'Booking online sangat memudahkan. Tidak perlu antri lama di rumah sakit.',
-      rating: 5
-    }
   ];
 
   return (
@@ -495,21 +478,38 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow duration-300">
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
+          {testimonialsLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+            </div>
+          ) : featuredTestimonials.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-8">
+              {featuredTestimonials.map((testimonial, index) => (
+                <div key={testimonial.id || index} className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow duration-300">
+                  <div className="flex mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 mb-6 italic">&quot;{testimonial.comment}&quot;</p>
+                  <div>
+                    <div className="font-semibold text-gray-900">{testimonial.patientName}</div>
+                    <div className="text-sm text-gray-600">Pasien - {testimonial.treatmentType}</div>
+                  </div>
                 </div>
-                <p className="text-gray-700 mb-6 italic">&quot;{testimonial.content}&quot;</p>
-                <div>
-                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                  <div className="text-sm text-gray-600">{testimonial.role}</div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Testimoni akan ditampilkan di sini</p>
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <Link href="/testimonials" className="inline-flex items-center px-6 py-3 border border-teal-600 rounded-lg text-teal-600 hover:bg-teal-600 hover:text-white transition-colors">
+              Lihat Semua Testimoni
+              <ChevronRight className="ml-2 w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>

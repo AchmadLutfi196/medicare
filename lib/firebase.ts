@@ -1,27 +1,59 @@
-// Firebase configuration
-// Replace with your actual Firebase config
+// This file is deprecated - using Prisma authentication instead
+// This is a placeholder to avoid import errors while transitioning
 
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-
-const firebaseConfig = {
-  // Add your Firebase config here
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id"
+// Mock Firebase objects for compatibility
+export const auth = {
+  currentUser: null,
+  config: { emulator: null }
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const db = null;
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+// These functions are deprecated
+export const createUserWithEmailAndPassword = async (auth: any, email: string, password: string) => {
+  console.warn("Firebase authentication is deprecated - use Prisma authentication instead");
+  return {
+    user: {
+      email,
+      delete: async () => {},
+      uid: "deprecated"
+    }
+  };
+};
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+export const signInWithEmailAndPassword = async (auth: any, email: string, password: string) => {
+  console.warn("Firebase authentication is deprecated - use Prisma authentication instead");
+  return {
+    user: {
+      email,
+      uid: "deprecated"
+    }
+  };
+};
+
+export const signOut = async (auth: any) => {
+  console.warn("Firebase authentication is deprecated - use Prisma authentication instead");
+  return Promise.resolve();
+};
+
+export const updateProfile = async (user: any, profile: any) => {
+  console.warn("Firebase authentication is deprecated - use Prisma authentication instead");
+  return Promise.resolve();
+};
+
+// Fix for the error in AuthContext:
+// This is an empty function that returns an unsubscribe function
+export const onAuthStateChanged = () => {
+  console.warn("Firebase authentication is deprecated - use Prisma authentication instead");
+  return () => {}; // unsubscribe function
+};
+
+const app = {
+  name: 'prisma-auth',
+  options: {}
+};
+
+// Alert developer that they should use Prisma instead
+console.warn("Firebase has been removed. Please use Prisma authentication services instead.");
 
 export default app;

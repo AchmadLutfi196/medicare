@@ -33,13 +33,85 @@ import {
   Download,
   FileText,
   ImageIcon,
-  Video
+  Video,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
+import { useContent } from '../../hooks/useContent';
+import { useDoctors } from '../../hooks/useDoctors';
+import { useTestimonials } from '../../hooks/useTestimonials';
 
 export default function HospitalProfile() {
   const [activeTab, setActiveTab] = useState('overview');
 
-  const achievements = [
+  // Fetch data from database
+  const { 
+    hospitalInfo, 
+    guides,
+    loading: contentLoading, 
+    error: contentError 
+  } = useContent();
+  
+  const { 
+    data: doctorsData, 
+    loading: doctorsLoading, 
+    error: doctorsError 
+  } = useDoctors();
+  
+  const { 
+    testimonials: testimonialsData, 
+    loading: testimonialsLoading, 
+    error: testimonialsError 
+  } = useTestimonials();
+
+  const loading = contentLoading || doctorsLoading || testimonialsLoading;
+  const error = contentError || doctorsError || testimonialsError;
+
+  if (loading) {
+    return (
+      <div className="pt-16 sm:pt-20 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto mb-4" />
+          <p className="text-gray-600">Memuat profil rumah sakit...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="pt-16 sm:pt-20 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
+          <p className="text-red-600 mb-4">Gagal memuat profil rumah sakit</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="text-teal-600 hover:text-teal-700 font-semibold"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Featured doctors (top rated)
+  const dynamicFeaturedDoctors = doctorsData
+    ? doctorsData.sort((a: any, b: any) => b.rating - a.rating).slice(0, 8)
+    : [];
+
+  // Featured testimonials
+  const dynamicTestimonials = testimonialsData
+    ? testimonialsData.filter((t: any) => t.rating >= 4).slice(0, 6)
+    : [];
+
+  // Fallback data for achievements and certifications
+  const achievements = hospitalInfo?.awards?.map((award, index) => ({
+    icon: [Award, Shield, Star, CheckCircle][index % 4] || Award,
+    title: award,
+    description: 'Standar pelayanan kesehatan terbaik',
+    year: '2023'
+  })) || [
     {
       icon: Award,
       title: 'Akreditasi KARS Paripurna',
@@ -281,24 +353,18 @@ export default function HospitalProfile() {
               <span className="font-medium">Tentang Kami</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              RS Medicare Prima
+              {hospitalInfo?.name || 'RS Medicare Prima'}
             </h1>
             <p className="text-xl md:text-2xl text-teal-100 mb-8">
-              Rumah Sakit Swasta Terdepan dengan Pelayanan Kesehatan Berkualitas Internasional
+              {hospitalInfo?.description || 'Rumah Sakit Swasta Terdepan dengan Pelayanan Kesehatan Berkualitas Internasional'}
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <div className="flex items-center space-x-2">
-                <Award className="w-5 h-5" />
-                <span>Akreditasi KARS Paripurna</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Shield className="w-5 h-5" />
-                <span>JCI Accredited</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Star className="w-5 h-5" />
-                <span>ISO 9001:2015</span>
-              </div>
+              {(hospitalInfo?.accreditations || ['Akreditasi KARS Paripurna', 'JCI Accredited', 'ISO 9001:2015']).slice(0, 3).map((accreditation, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  {[Award, Shield, Star][index] && React.createElement([Award, Shield, Star][index], { className: "w-5 h-5" })}
+                  <span>{accreditation}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -678,7 +744,7 @@ export default function HospitalProfile() {
 
               {/* Testimonials Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {testimonials.map((testimonial, index) => (
+                {(dynamicTestimonials.length > 0 ? dynamicTestimonials : testimonials).map((testimonial: any, index: number) => (
                   <div key={testimonial.id} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-teal-500 testimonial-card" style={{animationDelay: `${index * 0.1}s`}}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex text-yellow-400 star-rating">
@@ -686,7 +752,7 @@ export default function HospitalProfile() {
                           <Star key={i} className="w-5 h-5 fill-current star" />
                         ))}
                       </div>
-                      {testimonial.verified && (
+                      {testimonial.isVerified && (
                         <div className="flex items-center text-green-600 text-sm">
                           <CheckCircle className="w-4 h-4 mr-1" />
                           <span>Verified</span>
@@ -700,9 +766,9 @@ export default function HospitalProfile() {
                     </div>
                     
                     <div className="border-t pt-4">
-                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-teal-600">{testimonial.treatment}</div>
-                      <div className="text-xs text-gray-500 mt-1">{testimonial.date}</div>
+                      <div className="font-semibold text-gray-900">{testimonial.patientName || testimonial.name}</div>
+                      <div className="text-sm text-teal-600">{testimonial.treatmentType || testimonial.treatment}</div>
+                      <div className="text-xs text-gray-500 mt-1">{new Date(testimonial.createdAt || testimonial.date).toLocaleDateString('id-ID')}</div>
                     </div>
                   </div>
                 ))}
@@ -728,7 +794,7 @@ export default function HospitalProfile() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredDoctors.map((doctor, index) => (
+                {(dynamicFeaturedDoctors.length > 0 ? dynamicFeaturedDoctors : featuredDoctors).map((doctor: any, index: number) => (
                   <div key={doctor.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 doctor-card" style={{animationDelay: `${index * 0.1}s`}}>
                     <div className="relative">
                       <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
@@ -767,9 +833,14 @@ export default function HospitalProfile() {
                           Jadwal Praktek
                         </h4>
                         <div className="space-y-1">
-                          {doctor.schedule.map((schedule, index) => (
-                            <div key={index} className="text-sm text-gray-600">{schedule}</div>
-                          ))}
+                          {(doctor.schedule && typeof doctor.schedule === 'object' 
+                            ? Object.entries(doctor.schedule).map(([day, times]: [string, any], index: number) => (
+                                <div key={index} className="text-sm text-gray-600">{day}: {Array.isArray(times) ? times.join(', ') : times}</div>
+                              ))
+                            : doctor.schedule?.map((schedule: any, index: number) => (
+                                <div key={index} className="text-sm text-gray-600">{schedule}</div>
+                              )) || []
+                          )}
                         </div>
                       </div>
 

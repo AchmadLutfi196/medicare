@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Calendar, 
@@ -17,63 +17,34 @@ import {
   Heart,
   Shield,
   Star,
-  ArrowLeft
+  ArrowLeft,
+  Loader2
 } from 'lucide-react';
+import { useDoctors } from '../../hooks/useDoctors';
+import { useCreateAppointment } from '../../hooks/useAppointments';
+import { Doctor, AppointmentFormData } from '../../types/database';
 
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
+    age: '',
+    gender: '',
     complaint: '',
+    symptoms: [] as string[],
+    emergencyContact: '',
+    appointmentType: 'offline' as 'online' | 'offline' | 'emergency',
     insurance: ''
   });
 
-  const doctors = [
-    {
-      id: 1,
-      name: 'Dr. Andi Wijaya, Sp.JP(K)',
-      specialty: 'Kardiologi Intervensi',
-      rating: 4.9,
-      experience: '25 tahun',
-      price: 'Rp 350.000',
-      schedule: {
-        'Monday': ['08:00', '09:00', '10:00', '11:00'],
-        'Wednesday': ['14:00', '15:00', '16:00', '17:00'],
-        'Friday': ['08:00', '09:00', '10:00', '11:00']
-      }
-    },
-    {
-      id: 2,
-      name: 'Dr. Sari Indrawati, Sp.A(K)',
-      specialty: 'Anak & Neonatologi',
-      rating: 4.9,
-      experience: '20 tahun',
-      price: 'Rp 300.000',
-      schedule: {
-        'Tuesday': ['09:00', '10:00', '11:00', '13:00'],
-        'Thursday': ['14:00', '15:00', '16:00', '18:00'],
-        'Saturday': ['08:00', '09:00', '10:00', '12:00']
-      }
-    },
-    {
-      id: 3,
-      name: 'Dr. Bambang Sutrisno, Sp.B(K)Onk',
-      specialty: 'Bedah Onkologi',
-      rating: 4.8,
-      experience: '22 tahun',
-      price: 'Rp 400.000',
-      schedule: {
-        'Monday': ['13:00', '14:00', '15:00', '17:00'],
-        'Wednesday': ['08:00', '09:00', '10:00', '12:00'],
-        'Friday': ['13:00', '14:00', '15:00', '17:00']
-      }
-    }
-  ];
+  // Fetch doctors from API
+  const { data: doctorsData, loading: loadingDoctors, error: doctorsError } = useDoctors({ availability: true });
+  const { mutate: createAppointment, loading: creatingAppointment } = useCreateAppointment();
 
   const steps = [
     { number: 1, title: 'Pilih Dokter', icon: Stethoscope },
@@ -90,8 +61,65 @@ export default function BookingPage() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSymptomToggle = (symptom: string) => {
+    setFormData(prev => ({
+      ...prev,
+      symptoms: prev.symptoms.includes(symptom)
+        ? prev.symptoms.filter(s => s !== symptom)
+        : [...prev.symptoms, symptom]
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedDoctor || !selectedDate || !selectedTime) {
+      alert('Harap lengkapi semua data');
+      return;
+    }
+
+    const appointmentData: AppointmentFormData = {
+      doctorId: selectedDoctor.id,
+      appointmentDate: selectedDate,
+      appointmentTime: selectedTime,
+      type: formData.appointmentType,
+      reason: formData.complaint,
+      symptoms: formData.symptoms,
+      patientName: formData.name,
+      patientEmail: formData.email,
+      patientPhone: formData.phone,
+      patientAge: parseInt(formData.age),
+      patientGender: formData.gender,
+      emergencyContact: formData.emergencyContact,
+      notes: `Asuransi: ${formData.insurance || 'Tidak ada'}`
+    };
+
+    const result = await createAppointment(appointmentData);
+    
+    if (result.success) {
+      alert('Booking berhasil! Kami akan menghubungi Anda untuk konfirmasi.');
+      // Reset form
+      setCurrentStep(1);
+      setSelectedDoctor(null);
+      setSelectedDate('');
+      setSelectedTime('');
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        age: '',
+        gender: '',
+        complaint: '',
+        symptoms: [],
+        emergencyContact: '',
+        appointmentType: 'offline',
+        insurance: ''
+      });
+    } else {
+      alert('Terjadi kesalahan: ' + result.error);
+    }
   };
 
   const generateDateOptions = () => {
@@ -187,17 +215,28 @@ export default function BookingPage() {
                 <p className="text-gray-600">Pilih dokter sesuai dengan kebutuhan konsultasi Anda</p>
               </div>
               
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {doctors.map((doctor) => (
-                  <div 
-                    key={doctor.id}
-                    className={`bg-white rounded-xl p-6 shadow-lg cursor-pointer transition-all duration-300 ${
-                      selectedDoctor?.id === doctor.id 
-                        ? 'ring-2 ring-teal-500 bg-teal-50' 
-                        : 'hover:shadow-xl hover:scale-105'
-                    }`}
-                    onClick={() => setSelectedDoctor(doctor)}
-                  >
+              {loadingDoctors ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
+                  <span className="ml-2 text-gray-600">Memuat data dokter...</span>
+                </div>
+              ) : doctorsError ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                  <p className="text-red-600">Error: {doctorsError}</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {doctorsData?.map((doctor: Doctor) => (
+                    <div 
+                      key={doctor.id}
+                      className={`bg-white rounded-xl p-6 shadow-lg cursor-pointer transition-all duration-300 ${
+                        selectedDoctor?.id === doctor.id 
+                          ? 'ring-2 ring-teal-500 bg-teal-50' 
+                          : 'hover:shadow-xl hover:scale-105'
+                      }`}
+                      onClick={() => setSelectedDoctor(doctor)}
+                    >
                     <div className="text-center">
                       <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
                         <Stethoscope className="w-10 h-10 text-gray-400" />
@@ -222,8 +261,9 @@ export default function BookingPage() {
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -486,9 +526,26 @@ export default function BookingPage() {
                 <ChevronRight className="w-5 h-5" />
               </button>
             ) : (
-              <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
-                <Check className="w-5 h-5" />
-                <span>Konfirmasi Booking</span>
+              <button 
+                onClick={handleSubmit}
+                disabled={creatingAppointment}
+                className={`px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-colors ${
+                  creatingAppointment
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {creatingAppointment ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Memproses...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-5 h-5" />
+                    <span>Konfirmasi Booking</span>
+                  </>
+                )}
               </button>
             )}
           </div>

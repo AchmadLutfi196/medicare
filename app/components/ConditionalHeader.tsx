@@ -5,10 +5,13 @@ import Header from './Header';
 
 const ConditionalHeader = () => {
   const pathname = usePathname();
+  
+  // Routes where header should not be shown
   const isAdminRoute = pathname.startsWith('/admin');
-
-  // Jangan tampilkan header utama di halaman admin
-  if (isAdminRoute) {
+  const isAuthRoute = pathname === '/login' || pathname === '/register';
+  
+  // Don't show main header on admin routes or auth routes (login/register)
+  if (isAdminRoute || isAuthRoute) {
     return null;
   }
 

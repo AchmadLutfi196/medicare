@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Menu, 
   X, 
@@ -16,12 +16,38 @@ import {
   MessageSquare,
   LogIn,
   UserPlus,
-  Stethoscope
+  Stethoscope,
+  LogOut,
+  User
 } from 'lucide-react';
+import { usePrismaAuth } from '../../contexts/PrismaAuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { currentUser, logout } = usePrismaAuth();
+
+  // Force auth state check when the header renders
+  // This ensures the navbar is always in sync with the actual auth state
+  React.useEffect(() => {
+    // Check if we're on a login page - if so, the user should be logged out
+    if (pathname === '/login') {
+      // If somehow currentUser still exists when on login page, clear it
+      if (currentUser && typeof window !== 'undefined') {
+        const storedUser = localStorage.getItem('medicare_current_user');
+        if (!storedUser) {
+          // If localStorage is clear but context still has user, sync it
+          logout();
+        }
+      }
+    }
+  }, [pathname, currentUser, logout]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
 
   const navigation = [
     { name: 'Beranda', href: '/', icon: Heart },
@@ -89,18 +115,38 @@ const Header = () => {
           <div className="flex items-center space-x-1 sm:space-x-2 ml-auto">
             {/* Auth Buttons - Desktop */}
             <div className="hidden md:flex items-center space-x-2">
-              <Link href="/login">
-                <button className="flex items-center space-x-2 px-3 lg:px-4 py-2 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg font-semibold transition-all duration-200 border border-teal-200 hover:border-teal-300">
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden lg:inline">Masuk</span>
-                </button>
-              </Link>
-              <Link href="/register">
-                <button className="flex items-center space-x-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-500 hover:from-teal-700 hover:to-cyan-600 text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
-                  <UserPlus className="w-4 h-4" />
-                  <span className="hidden lg:inline">Daftar</span>
-                </button>
-              </Link>
+              {currentUser ? (
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
+                    <User className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700 hidden lg:inline">
+                      {currentUser.firstName} {currentUser.lastName}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 px-3 lg:px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg font-semibold transition-all duration-200 border border-red-200 hover:border-red-300"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden lg:inline">Keluar</span>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <button className="flex items-center space-x-2 px-3 lg:px-4 py-2 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg font-semibold transition-all duration-200 border border-teal-200 hover:border-teal-300">
+                      <LogIn className="w-4 h-4" />
+                      <span className="hidden lg:inline">Masuk</span>
+                    </button>
+                  </Link>
+                  <Link href="/register">
+                    <button className="flex items-center space-x-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-500 hover:from-teal-700 hover:to-cyan-600 text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
+                      <UserPlus className="w-4 h-4" />
+                      <span className="hidden lg:inline">Daftar</span>
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Emergency Number - Desktop */}
@@ -121,16 +167,27 @@ const Header = () => {
             <div className="flex items-center space-x-1 lg:hidden">
               {/* Mobile Auth Buttons */}
               <div className="hidden sm:flex md:hidden items-center space-x-1">
-                <Link href="/login">
-                  <button className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-all duration-200">
-                    <LogIn className="w-5 h-5" />
+                {currentUser ? (
+                  <button 
+                    onClick={handleLogout}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                  >
+                    <LogOut className="w-5 h-5" />
                   </button>
-                </Link>
-                <Link href="/register">
-                  <button className="p-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-lg transition-all duration-200 shadow-md">
-                    <UserPlus className="w-5 h-5" />
-                  </button>
-                </Link>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <button className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-all duration-200">
+                        <LogIn className="w-5 h-5" />
+                      </button>
+                    </Link>
+                    <Link href="/register">
+                      <button className="p-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-lg transition-all duration-200 shadow-md">
+                        <UserPlus className="w-5 h-5" />
+                      </button>
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Mobile Emergency Button */}
@@ -196,20 +253,41 @@ const Header = () => {
                   
                   {/* Auth Section - Mobile Only */}
                   <div className="sm:hidden pt-3 border-t border-gray-200">
-                    <div className="grid grid-cols-2 gap-2 mb-3">
-                      <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                        <button className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg font-semibold transition-all duration-200 border border-teal-200 hover:border-teal-300 text-sm">
-                          <LogIn className="w-4 h-4" />
-                          <span>Masuk</span>
+                    {currentUser ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
+                          <User className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-700">
+                            {currentUser.firstName} {currentUser.lastName}
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            handleLogout();
+                            setIsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg font-semibold transition-all duration-200 border border-red-200 hover:border-red-300 text-sm"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Keluar</span>
                         </button>
-                      </Link>
-                      <Link href="/register" onClick={() => setIsMenuOpen(false)}>
-                        <button className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-500 hover:from-teal-700 hover:to-cyan-600 text-white rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm">
-                          <UserPlus className="w-4 h-4" />
-                          <span>Daftar</span>
-                        </button>
-                      </Link>
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                          <button className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg font-semibold transition-all duration-200 border border-teal-200 hover:border-teal-300 text-sm">
+                            <LogIn className="w-4 h-4" />
+                            <span>Masuk</span>
+                          </button>
+                        </Link>
+                        <Link href="/register" onClick={() => setIsMenuOpen(false)}>
+                          <button className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-500 hover:from-teal-700 hover:to-cyan-600 text-white rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm">
+                            <UserPlus className="w-4 h-4" />
+                            <span>Daftar</span>
+                          </button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
                   {/* Emergency Section - Compact for Mobile */}

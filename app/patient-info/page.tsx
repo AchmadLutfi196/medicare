@@ -18,127 +18,120 @@ import {
   AlertCircle,
   CheckCircle,
   ArrowLeft,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react';
+import { useContent } from '../../hooks/useContent';
 
 export default function PatientInfoPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const faqData = [
-    {
-      category: 'Pendaftaran & Booking',
-      questions: [
-        {
-          id: 1,
-          question: 'Bagaimana cara mendaftar sebagai pasien baru?',
-          answer: 'Anda dapat mendaftar secara online melalui website kami atau datang langsung ke rumah sakit dengan membawa KTP, kartu keluarga, dan kartu asuransi (jika ada). Proses pendaftaran online dapat dilakukan 24 jam, sedangkan pendaftaran langsung tersedia pada jam operasional.'
-        },
-        {
-          id: 2,
-          question: 'Apakah bisa booking online untuk semua layanan?',
-          answer: 'Ya, kami menyediakan booking online untuk konsultasi dokter spesialis, medical check-up, dan layanan diagnostik. Untuk layanan emergency, silakan langsung datang ke IGD atau hubungi nomor darurat kami.'
-        },
-        {
-          id: 3,
-          question: 'Berapa lama sebelumnya saya harus booking?',
-          answer: 'Kami merekomendasikan booking minimal H-1 untuk konsultasi reguler. Untuk dokter spesialis tertentu yang memiliki jadwal padat, booking dapat dilakukan hingga 2 minggu sebelumnya.'
-        }
-      ]
-    },
-    {
-      category: 'Pembayaran & Asuransi',
-      questions: [
-        {
-          id: 4,
-          question: 'Metode pembayaran apa saja yang diterima?',
-          answer: 'Kami menerima pembayaran tunai, kartu debit, kartu kredit, transfer bank, dan pembayaran melalui aplikasi digital. Kami juga bekerjasama dengan berbagai asuransi kesehatan dan BPJS.'
-        },
-        {
-          id: 5,
-          question: 'Asuransi apa saja yang bekerjasama dengan RS Medicare Prima?',
-          answer: 'Kami bekerjasama dengan BPJS Kesehatan, Allianz, AXA, Prudential, Great Eastern, Sinarmas, dan masih banyak lagi. Silakan hubungi customer service untuk informasi asuransi spesifik.'
-        },
-        {
-          id: 6,
-          question: 'Bagaimana proses klaim asuransi?',
-          answer: 'Tim kami akan membantu proses klaim asuransi Anda. Pastikan membawa kartu asuransi yang masih berlaku dan dokumen pendukung lainnya. Proses approval biasanya memerlukan waktu 1-3 hari kerja.'
-        }
-      ]
-    },
-    {
-      category: 'Layanan & Fasilitas',
-      questions: [
-        {
-          id: 7,
-          question: 'Apa saja layanan unggulan RS Medicare Prima?',
-          answer: 'Layanan unggulan kami meliputi Heart Center, Cancer Center, Women & Children Center, Emergency Department 24 jam, Intensive Care Unit, dan berbagai layanan diagnostik canggih seperti MRI, CT-Scan, dan Cathlab.'
-        },
-        {
-          id: 8,
-          question: 'Apakah tersedia layanan ambulans?',
-          answer: 'Ya, kami memiliki layanan ambulans 24 jam dengan peralatan medis lengkap dan tenaga medis terlatih. Hubungi nomor emergency kami untuk layanan ambulans.'
-        },
-        {
-          id: 9,
-          question: 'Bagaimana dengan fasilitas parkir?',
-          answer: 'Kami menyediakan area parkir yang luas dan aman untuk mobil dan motor. Parkir gratis untuk pasien dan pengunjung. Tersedia juga layanan valet parking untuk kemudahan Anda.'
-        }
-      ]
-    },
-    {
-      category: 'Jam Operasional',
-      questions: [
-        {
-          id: 10,
-          question: 'Berapa jam operasional rumah sakit?',
-          answer: 'IGD buka 24 jam setiap hari. Poliklinik buka Senin-Sabtu pukul 08:00-20:00. Farmasi buka 24 jam. Laboratorium buka 06:00-22:00 setiap hari.'
-        },
-        {
-          id: 11,
-          question: 'Apakah ada layanan weekend?',
-          answer: 'Ya, sebagian besar layanan kami tersedia di weekend termasuk IGD, rawat inap, farmasi, dan beberapa poliklinik spesialis. Namun jadwal dokter di weekend mungkin terbatas.'
-        }
-      ]
-    }
+  // Fetch content from database
+  const { 
+    faqs, 
+    guides, 
+    hospitalInfo,
+    loading, 
+    error 
+  } = useContent();
+
+  // Fallback data for documents (could be moved to database later)
+  const documents = [
+    { name: 'Panduan Pasien Rawat Jalan', size: '2.1 MB', type: 'PDF' },
+    { name: 'Panduan Pasien Rawat Inap', size: '1.8 MB', type: 'PDF' },
+    { name: 'Prosedur Emergency', size: '1.2 MB', type: 'PDF' },
+    { name: 'Daftar Tarif Layanan', size: '956 KB', type: 'PDF' },
+    { name: 'Formulir Pengaduan', size: '245 KB', type: 'PDF' }
   ];
 
-  const guidelines = [
-    {
-      title: 'Persiapan Kunjungan',
-      icon: CheckCircle,
-      items: [
-        'Bawa kartu identitas (KTP/SIM/Paspor)',
-        'Bawa kartu asuransi atau BPJS (jika ada)',
-        'Siapkan daftar obat yang sedang dikonsumsi',
-        'Catat keluhan dan gejala yang dialami',
-        'Datang 15 menit sebelum jadwal konsultasi'
-      ]
-    },
-    {
-      title: 'Selama di Rumah Sakit',
-      icon: Shield,
-      items: [
-        'Ikuti protokol kesehatan yang berlaku',
-        'Gunakan masker di area rumah sakit',
-        'Jaga kebersihan tangan dengan hand sanitizer',
-        'Ikuti petunjuk petugas keamanan',
-        'Jaga ketenangan dan ketertiban'
-      ]
-    },
-    {
-      title: 'Setelah Konsultasi',
-      icon: FileText,
-      items: [
-        'Pastikan mendapat resep obat (jika diperlukan)',
-        'Tanyakan jadwal kontrol berikutnya',
-        'Simpan hasil pemeriksaan dengan baik',
-        'Ikuti anjuran dokter dengan disiplin',
-        'Hubungi kami jika ada pertanyaan'
-      ]
-    }
-  ];
+  const toggleFaq = (id: number) => {
+    setOpenFaq(openFaq === id ? null : id);
+  };
 
-  const emergencyInfo = {
+  // Group FAQs by category
+  const groupedFAQs = faqs.reduce((acc, faq) => {
+    const category = faq.category || 'Umum';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(faq);
+    return acc;
+  }, {} as Record<string, typeof faqs>);
+
+  // Convert grouped FAQs to the expected format
+  const faqData = Object.entries(groupedFAQs).map(([category, questions]) => ({
+    category,
+    questions: questions.map((faq, index) => ({
+      id: index + 1,
+      question: faq.question,
+      answer: faq.answer
+    }))
+  }));
+
+  // Filter guides for patient info
+  const patientGuides = guides.filter(guide => 
+    guide.type === 'patient' || 
+    guide.type === 'general' ||
+    guide.title.toLowerCase().includes('pasien') ||
+    guide.title.toLowerCase().includes('kunjungan')
+  ).slice(0, 3);
+
+  // Create guidelines from guides or use fallback
+  const guidelines = patientGuides.length > 0 
+    ? patientGuides.map((guide, index) => ({
+        title: guide.title,
+        icon: [CheckCircle, Shield, FileText][index] || CheckCircle,
+        items: guide.steps.slice(0, 5)
+      }))
+    : [
+        {
+          title: 'Persiapan Kunjungan',
+          icon: CheckCircle,
+          items: [
+            'Bawa kartu identitas (KTP/SIM/Paspor)',
+            'Bawa kartu asuransi atau BPJS (jika ada)',
+            'Siapkan daftar obat yang sedang dikonsumsi',
+            'Catat keluhan dan gejala yang dialami',
+            'Datang 15 menit sebelum jadwal konsultasi'
+          ]
+        },
+        {
+          title: 'Selama di Rumah Sakit',
+          icon: Shield,
+          items: [
+            'Ikuti protokol kesehatan yang berlaku',
+            'Gunakan masker di area rumah sakit',
+            'Jaga kebersihan tangan dengan hand sanitizer',
+            'Ikuti petunjuk petugas keamanan',
+            'Jaga ketenangan dan ketertiban'
+          ]
+        },
+        {
+          title: 'Setelah Konsultasi',
+          icon: FileText,
+          items: [
+            'Pastikan mendapat resep obat (jika diperlukan)',
+            'Tanyakan jadwal kontrol berikutnya',
+            'Simpan hasil pemeriksaan dengan baik',
+            'Ikuti anjuran dokter dengan disiplin',
+            'Hubungi kami jika ada pertanyaan'
+          ]
+        }
+      ];
+
+  // Emergency info from hospital info or fallback
+  const emergencyInfo = hospitalInfo ? {
+    numbers: [
+      { label: 'IGD 24 Jam', number: hospitalInfo.emergencyNumber || '119', description: 'Layanan gawat darurat' },
+      { label: 'Ambulans', number: hospitalInfo.phone || '+62 21 5555-0119', description: 'Layanan ambulans darurat' },
+      { label: 'Info Umum', number: hospitalInfo.phone || '+62 21 5555-0100', description: 'Informasi umum rumah sakit' },
+      { label: 'WhatsApp', number: hospitalInfo.phone || '+62 812-3456-7890', description: 'Chat untuk informasi' }
+    ],
+    location: {
+      address: hospitalInfo.address || 'Jl. Kesehatan Raya No. 123, Jakarta Selatan 12345',
+      landmark: 'Dekat Mall Kesehatan, seberang Universitas Medika'
+    }
+  } : {
     numbers: [
       { label: 'IGD 24 Jam', number: '119', description: 'Layanan gawat darurat' },
       { label: 'Ambulans', number: '+62 21 5555-0119', description: 'Layanan ambulans darurat' },
@@ -151,17 +144,33 @@ export default function PatientInfoPage() {
     }
   };
 
-  const documents = [
-    { name: 'Panduan Pasien Rawat Jalan', size: '2.1 MB', type: 'PDF' },
-    { name: 'Panduan Pasien Rawat Inap', size: '1.8 MB', type: 'PDF' },
-    { name: 'Prosedur Emergency', size: '1.2 MB', type: 'PDF' },
-    { name: 'Daftar Tarif Layanan', size: '956 KB', type: 'PDF' },
-    { name: 'Formulir Pengaduan', size: '245 KB', type: 'PDF' }
-  ];
+  if (loading) {
+    return (
+      <div className="pt-16 sm:pt-20 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto mb-4" />
+          <p className="text-gray-600">Memuat informasi pasien...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const toggleFaq = (id: number) => {
-    setOpenFaq(openFaq === id ? null : id);
-  };
+  if (error) {
+    return (
+      <div className="pt-16 sm:pt-20 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
+          <p className="text-red-600 mb-4">Gagal memuat informasi pasien</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="text-teal-600 hover:text-teal-700 font-semibold"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-16 sm:pt-20 min-h-screen bg-gray-50">
@@ -246,7 +255,7 @@ export default function PatientInfoPage() {
                 </div>
                 
                 <ul className="space-y-3">
-                  {guide.items.map((item, itemIndex) => (
+                  {guide.items.map((item: string, itemIndex: number) => (
                     <li key={itemIndex} className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{item}</span>
