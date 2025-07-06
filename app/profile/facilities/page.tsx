@@ -33,7 +33,7 @@ import {
   isGeneralFacility,
   isTechnologyFacility
 } from './typeguards';
-import { hasProp, getProp } from './utils';
+// Import removed since utility functions are no longer needed
 
 export default function FacilitiesPage() {
   const [activeCategory, setActiveCategory] = useState('medical');
@@ -317,8 +317,8 @@ export default function FacilitiesPage() {
                 <div className="p-8">
                   <div className="flex items-start justify-between mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{getProp(facility, 'name', '')}</h3>
-                      <p className="text-gray-600">{getProp(facility, 'description', '')}</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{facility.name}</h3>
+                      <p className="text-gray-600">{facility.description}</p>
                     </div>
                     <div className={`p-3 rounded-full ${facilityCategories.find(c => c.id === activeCategory)?.color}`}>
                       {React.createElement(facilityCategories.find(c => c.id === activeCategory)?.icon || Hospital, { className: "w-6 h-6" })}
@@ -330,7 +330,7 @@ export default function FacilitiesPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Fitur Unggulan</h4>
                       <div className="grid grid-cols-2 gap-2">
-                        {getProp(facility, 'features', []).map((feature: string, featureIndex: number) => (
+                        {facility.features.map((feature: string, featureIndex: number) => (
                           <div key={featureIndex} className="flex items-center space-x-2">
                             <CheckCircle className="w-4 h-4 text-teal-600 flex-shrink-0" />
                             <span className="text-sm text-gray-700">{feature}</span>
@@ -341,46 +341,46 @@ export default function FacilitiesPage() {
 
                     {/* Additional Info */}
                     <div className="grid grid-cols-1 gap-4">
-                      {/* Using utility functions for TypeScript-safe property access */}
+                      {/* Menggunakan operator 'in' untuk TypeScript-safe property access */}
                       
                       {/* Capacity property */}
-                      {hasProp(facility, 'capacity') && (
+                      {'capacity' in facility && facility.capacity && (
                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600">Kapasitas</span>
-                          <span className="text-sm font-bold text-gray-900">{getProp(facility, 'capacity')}</span>
+                          <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
                         </div>
                       )}
                       
                       {/* Staff property */}
-                      {hasProp(facility, 'staff') && (
+                      {'staff' in facility && facility.staff && (
                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600">Tenaga Ahli</span>
-                          <span className="text-sm font-bold text-gray-900">{getProp(facility, 'staff')}</span>
+                          <span className="text-sm font-bold text-gray-900">{facility.staff}</span>
                         </div>
                       )}
 
                       {/* Certification property */}
-                      {hasProp(facility, 'certification') && (
+                      {'certification' in facility && facility.certification && (
                         <div className="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
                           <span className="text-sm font-medium text-teal-600">Sertifikasi</span>
-                          <span className="text-sm font-bold text-teal-900">{getProp(facility, 'certification')}</span>
+                          <span className="text-sm font-bold text-teal-900">{facility.certification}</span>
                         </div>
                       )}
 
                       {/* Coverage property */}
-                      {hasProp(facility, 'coverage') && (
+                      {'coverage' in facility && facility.coverage && (
                         <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                           <span className="text-sm font-medium text-blue-600">Cakupan</span>
-                          <span className="text-sm font-bold text-blue-900">{getProp(facility, 'coverage')}</span>
+                          <span className="text-sm font-bold text-blue-900">{facility.coverage}</span>
                         </div>
                       )}
 
                       {/* Types property */}
-                      {hasProp(facility, 'types') && (
+                      {'types' in facility && facility.types && (
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600 block mb-2">Jenis Layanan</span>
                           <div className="flex flex-wrap gap-2">
-                            {getProp(facility, 'types', []).map((type: string, typeIndex: number) => (
+                            {facility.types.map((type, typeIndex) => (
                               <span key={typeIndex} className="text-xs bg-white px-2 py-1 rounded text-gray-700">
                                 {type}
                               </span>
@@ -390,11 +390,11 @@ export default function FacilitiesPage() {
                       )}
 
                       {/* Benefits property */}
-                      {hasProp(facility, 'benefits') && (
+                      {'benefits' in facility && facility.benefits && (
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <span className="text-sm font-medium text-gray-600 block mb-2">Manfaat</span>
                           <div className="flex flex-wrap gap-2">
-                            {getProp(facility, 'benefits', []).map((benefit: string, benefitIndex: number) => (
+                            {facility.benefits.map((benefit, benefitIndex) => (
                               <span key={benefitIndex} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
                                 {benefit}
                               </span>
