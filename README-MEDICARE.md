@@ -1,23 +1,176 @@
-# RS Medicare Prima - Hospital Website
+# Medicare - Modern Healthcare Management System
 
-Website rumah sakit modern yang dirancang untuk memberikan akses mudah, informatif, dan interaktif bagi pasien, pengunjung, maupun staf internal rumah sakit.
+## Description
 
-## 🏥 Fitur Utama
+Medicare is a comprehensive healthcare management platform designed to streamline medical services, appointment scheduling, and facility management. It connects patients with healthcare providers through an intuitive digital interface, making healthcare more accessible and manageable.
 
-### Untuk Pasien & Pengunjung
-- **Landing Page** - Informasi umum rumah sakit, visi-misi, dan layanan unggulan
-- **Direktori Dokter** - Daftar dokter spesialis dengan jadwal praktik
-- **Jadwal Poliklinik** - Tabel interaktif jadwal layanan setiap poli
-- **Booking Online** - Sistem booking janji temu dengan dokter
-- **Artikel Kesehatan** - Konten edukatif dan berita kesehatan
-- **Kontak & Lokasi** - Informasi lengkap dengan peta interaktif
-- **Login Pasien** - Akses ke akun personal
+The system features separate portals for patients, doctors, and administrators, allowing each user type to access relevant functionalities while maintaining a cohesive experience across the platform.
 
-### Untuk Admin/Staff
-- **Dashboard Admin** - Panel kontrol dengan statistik dan monitoring
-- **Manajemen Dokter** - CRUD data dokter dan jadwal praktik
-- **Manajemen Booking** - Kelola reservasi dan janji temu pasien
-- **Manajemen Artikel** - Publikasi dan edit artikel kesehatan
+## Technologies Used
+
+- **Frontend**: 
+  - Next.js 15.3.5 (React framework)
+  - TypeScript
+  - TailwindCSS
+  - Lucide React (icons)
+  - React Hook Form with Yup validation
+
+- **Backend**:
+  - Next.js API Routes
+  - Prisma ORM
+  - SQLite (development)
+  - Mock database service (for offline/testing scenarios)
+
+- **Authentication**:
+  - Custom authentication system
+  - JWT token-based authentication
+
+- **Development Tools**:
+  - TypeScript
+  - ESLint
+  - TurboRepo (for fast development)
+
+## Features
+
+### Patient Portal
+
+- **Account Management**:
+  - Registration and login
+  - Profile management
+  - Medical history tracking
+
+- **Appointment System**:
+  - Browse available doctors
+  - Schedule, reschedule, and cancel appointments
+  - View appointment history
+
+- **Doctor Discovery**:
+  - Find doctors by specialty
+  - View doctor profiles, ratings, and availability
+  - Read patient testimonials
+
+- **Healthcare Information**:
+  - Browse medical articles and resources
+  - View facility information
+
+### Doctor Portal
+
+- **Schedule Management**:
+  - Set availability hours
+  - View upcoming appointments
+  - Manage patient information
+
+- **Profile Management**:
+  - Update professional information
+  - Manage specialties and services
+
+### Admin Dashboard
+
+- **User Management**:
+  - Manage patient accounts
+  - Onboard and manage doctors
+
+- **Content Management**:
+  - Create and edit medical articles
+  - Manage facility information
+
+- **System Administration**:
+  - Monitor booking statistics
+  - Database management
+  - Configure system settings
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- Git
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/medicare.git
+   cd medicare
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn
+   ```
+
+3. Set up the database:
+   ```bash
+   npm run prisma:generate
+   npm run prisma:migrate
+   ```
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+5. Open your browser and navigate to:
+   ```
+   http://localhost:3000
+   ```
+
+### Deployment
+
+To deploy to production:
+
+1. Build the application:
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+
+2. For Vercel deployment:
+   ```bash
+   npm run prisma:generate && next build
+   ```
+
+## AI Support Explanation
+
+This project has been enhanced with AI-assisted development in the following areas:
+
+1. **Type Safety Implementation**:
+   - AI helped identify and fix TypeScript union type handling with proper type guards
+   - Enhanced code safety with the `in` operator for property checking across different facility types
+
+2. **Mock Database Services**:
+   - Implemented robust in-memory database services for development and testing
+   - Created fallback mechanisms when external services are unavailable
+
+3. **Error Handling**:
+   - Enhanced UI with clear error states and fallback data
+   - Improved user feedback for offline/mock mode
+
+4. **Build and Deployment Optimization**:
+   - Fixed Prisma client initialization issues on Vercel
+   - Implemented proper build process to ensure database access in production
+
+5. **Code Quality**:
+   - Improved JSX structure and component organization
+   - Enhanced reusability with proper hooks implementation
+
+The AI-assisted development process helped identify and fix critical issues related to type safety, asynchronous data handling, and deployment configurations, resulting in a more stable and maintainable application.
+
+## License
+
+[MIT](LICENSE)
+
+## Contact
+
+For questions or feedback, please contact:
+- Project Maintainer: [Your Name](mailto:your.email@example.com)
+- Repository: [GitHub](https://github.com/your-username/medicare)
 - **Notifikasi Real-time** - Alert dan update sistem
 
 ## 🎨 Design System
