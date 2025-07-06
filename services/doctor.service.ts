@@ -1,7 +1,8 @@
 // Doctor service for CRUD operations
-import { where, orderBy, QueryConstraint } from 'firebase/firestore';
-import { dbService } from './database.service';
+import { DatabaseService } from './database.service';
 import { Doctor, DoctorFilters, ApiResponse } from '../types/database';
+
+const dbService = DatabaseService.getInstance();
 
 export class DoctorService {
   private static instance: DoctorService;
@@ -31,36 +32,56 @@ export class DoctorService {
   }
 
   async getAllDoctors(filters?: DoctorFilters): Promise<ApiResponse<Doctor[]>> {
-    const constraints: QueryConstraint[] = [];
-
-    if (filters) {
-      if (filters.specialty) {
-        constraints.push(where('specialty', '==', filters.specialty));
+    console.warn("Firebase constraints have been removed. Using mock database implementation with client-side filtering.");
+    
+    // Get all doctors from the mock database
+    const result = await dbService.getAll<Doctor>(this.collectionName);
+    
+    // Apply client-side filters
+    if (result.success && result.data && result.data.length > 0) {
+      if (filters) {
+        // Filter by specialty
+        if (filters.specialty) {
+          result.data = result.data.filter(doctor => 
+            doctor.specialty === filters.specialty
+          );
+        }
+        
+        // Filter by availability
+        if (filters.availability !== undefined) {
+          result.data = result.data.filter(doctor => 
+            doctor.isAvailable === filters.availability
+          );
+        }
+        
+        // Filter by rating
+        if (filters.rating) {
+          result.data = result.data.filter(doctor => 
+            doctor.rating >= (filters.rating || 0)
+          );
+        }
+        
+        // Filter by consultation type
+        if (filters.consultationType) {
+          result.data = result.data.filter(doctor => 
+            doctor.consultationTypes && 
+            doctor.consultationTypes.includes(filters.consultationType as any)
+          );
+        }
+        
+        // Filter by search term
+        if (filters.search) {
+          const searchTerm = filters.search.toLowerCase();
+          result.data = result.data.filter(doctor => 
+            doctor.name.toLowerCase().includes(searchTerm) ||
+            doctor.specialty.toLowerCase().includes(searchTerm) ||
+            (doctor.bio && doctor.bio.toLowerCase().includes(searchTerm))
+          );
+        }
       }
-      if (filters.availability !== undefined) {
-        constraints.push(where('isAvailable', '==', filters.availability));
-      }
-      if (filters.rating) {
-        constraints.push(where('rating', '>=', filters.rating));
-      }
-      if (filters.consultationType) {
-        constraints.push(where('consultationTypes', 'array-contains', filters.consultationType));
-      }
-    }
-
-    // Order by rating descending by default
-    constraints.push(orderBy('rating', 'desc'));
-
-    const result = await dbService.getAll<Doctor>(this.collectionName, constraints);
-
-    // Apply client-side search filter if needed
-    if (result.success && result.data && filters?.search) {
-      const searchTerm = filters.search.toLowerCase();
-      result.data = result.data.filter(doctor => 
-        doctor.name.toLowerCase().includes(searchTerm) ||
-        doctor.specialty.toLowerCase().includes(searchTerm) ||
-        doctor.bio.toLowerCase().includes(searchTerm)
-      );
+      
+      // Sort by rating descending
+      result.data.sort((a, b) => b.rating - a.rating);
     }
 
     return result;
@@ -109,28 +130,31 @@ export class DoctorService {
 
   // Get doctors with pagination
   async getDoctorsPaginated(page: number = 1, limit: number = 10, filters?: DoctorFilters) {
-    const constraints: QueryConstraint[] = [];
+    console.warn("Firebase constraints have been removed. Using mock database implementation with client-side pagination.");
+    
+    // First get all doctors with filters applied
+    const result = await this.getAllDoctors(filters);
 
-    if (filters) {
-      if (filters.specialty) {
-        constraints.push(where('specialty', '==', filters.specialty));
-      }
-      if (filters.availability !== undefined) {
-        constraints.push(where('isAvailable', '==', filters.availability));
-      }
-      if (filters.rating) {
-        constraints.push(where('rating', '>=', filters.rating));
-      }
+    // Implement client-side pagination
+    if (result.success && result.data) {
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+      const items = result.data.slice(startIndex, endIndex);
+      const total = result.data.length;
+      
+      return {
+        success: true,
+        data: {
+          items,
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     }
-
-    constraints.push(orderBy('rating', 'desc'));
-
-    return await dbService.getPaginated<Doctor>(
-      this.collectionName,
-      limit,
-      undefined, // lastDoc would be tracked for pagination
-      constraints
-    );
+    
+    return result;
   }
 
   // Get unique specialties
