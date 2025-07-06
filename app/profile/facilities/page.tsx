@@ -344,12 +344,11 @@ export default function FacilitiesPage() {
                       {/* Menggunakan operator 'in' untuk TypeScript-safe property access */}
                       
                       {'capacity' in facility && facility.capacity && (
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-600">Kapasitas</span>
-                        <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
-                      </div>
-                    )}
-
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <span className="text-sm font-medium text-gray-600">Kapasitas</span>
+                          <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
+                        </div>
+                      )}
                       
                       {/* Staff property */}
                       {'staff' in facility && facility.staff && (
