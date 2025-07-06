@@ -343,13 +343,12 @@ export default function FacilitiesPage() {
                     <div className="grid grid-cols-1 gap-4">
                       {/* Menggunakan operator 'in' untuk TypeScript-safe property access */}
                       
-                      {/* Capacity property */}
                       {"capacity" in facility && facility.capacity && (
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <span className="text-sm font-medium text-gray-600">Kapasitas</span>
-                          <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-600">Kapasitas</span>
+                        <span className="text-sm font-bold text-gray-900">{facility.capacity}</span>
+                      </div>
+                    )}
 
                       
                       {/* Staff property */}
