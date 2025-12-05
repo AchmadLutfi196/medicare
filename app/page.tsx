@@ -179,70 +179,66 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Content - Emergency Card */}
+            {/* Right Content - Hero Illustration */}
             <div className={`relative transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-              {/* Emergency Services Card */}
-              <div className="relative bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
-                {/* Decorative Elements */}
-                <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full opacity-10 animate-pulse"></div>
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-teal-400 to-cyan-600 rounded-full opacity-10 animate-pulse delay-1000"></div>
-
-                <div className="text-center space-y-6">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4">
-                      <Heart className="w-8 h-8 text-white animate-pulse" />
+              {/* Main Illustration */}
+              <div className="relative">
+                {/* SVG Illustration */}
+                <img 
+                  src="/images/hospital-family-visit.svg" 
+                  alt="Hospital Family Visit" 
+                  className="w-full h-auto max-w-lg mx-auto drop-shadow-2xl"
+                />
+                
+                {/* Floating Emergency Card */}
+                <div className="absolute -bottom-4 -left-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl p-4 border border-white/20 animate-bounce delay-500">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-white animate-pulse" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">Layanan Darurat</h3>
-                    <p className="text-gray-600">Siaga 24 jam untuk kondisi darurat medis</p>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <Link href="tel:119" className="block group">
-                      <button className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-3 group-hover:scale-105 shadow-lg">
-                        <Phone className="w-6 h-6 animate-pulse" />
-                        <span>IGD: 119</span>
-                      </button>
-                    </Link>
-                    
-                    <Link href="https://wa.me/628123456789" className="block group">
-                      <button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-3 group-hover:scale-105 shadow-lg">
-                        <Phone className="w-6 h-6" />
-                        <span>WhatsApp</span>
-                      </button>
-                    </Link>
-                  </div>
-
-                  {/* Quick Info */}
-                  <div className="border-t pt-6 space-y-3">
-                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                      <MapPin className="w-4 h-4" />
-                      <span>Jl. Kesehatan No. 123, Jakarta</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span>Buka 24 jam setiap hari</span>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">IGD 24 Jam</div>
+                      <Link href="tel:119" className="text-red-600 font-semibold hover:underline">
+                        Hubungi: 119
+                      </Link>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Floating Trust Badges */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-lg p-4 animate-bounce delay-2000">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-6 h-6 text-green-500" />
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">ISO 9001</div>
-                    <div className="text-xs text-gray-600">Certified</div>
+                {/* Floating WhatsApp Card */}
+                <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl p-4 border border-white/20 animate-bounce delay-1000">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                      <Phone className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">WhatsApp</div>
+                      <Link href="https://wa.me/628123456789" className="text-green-600 font-semibold hover:underline text-sm">
+                        Chat Sekarang
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-lg p-4 animate-bounce delay-1500">
-                <div className="flex items-center space-x-2">
-                  <Award className="w-6 h-6 text-yellow-500" />
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">Best Service</div>
-                    <div className="text-xs text-gray-600">2024</div>
+                {/* Floating Trust Badge - ISO */}
+                <div className="absolute bottom-1/4 -right-6 bg-white rounded-2xl shadow-lg p-3 animate-bounce delay-2000">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-5 h-5 text-green-500" />
+                    <div>
+                      <div className="text-xs font-semibold text-gray-900">ISO 9001</div>
+                      <div className="text-[10px] text-gray-600">Certified</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Trust Badge - Award */}
+                <div className="absolute top-1/4 -left-6 bg-white rounded-2xl shadow-lg p-3 animate-bounce delay-1500">
+                  <div className="flex items-center space-x-2">
+                    <Award className="w-5 h-5 text-yellow-500" />
+                    <div>
+                      <div className="text-xs font-semibold text-gray-900">Best Service</div>
+                      <div className="text-[10px] text-gray-600">2024</div>
+                    </div>
                   </div>
                 </div>
               </div>
